@@ -10,8 +10,10 @@ Created by: chrisbsd
 #### Usage:
 
 * Clone the repository and cd into it
-* Get information about the tool: go run ssl_analysis.go help
-* List a quick listing of the available headers: go run ssl_analysis.go options
+* Get information about the tool:
+    go run ssl_analysis.go help
+* List a quick listing of the available headers:
+    go run ssl_analysis.go options
 * Start it using your website: go run ssl_analysis.go https://www.yourwebsite.com
 
 
