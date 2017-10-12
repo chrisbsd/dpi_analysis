@@ -11,6 +11,11 @@ import (
 )
 
 func main() {
+	arr_hashes := []string {
+		"df255af635a2dde04c031db95862f11e1bf44fe5cfc10d3b20bd4678ed818567",
+		"33b62b95281bb0ecbad2523bb99e4853fd516044b8f2b42ef4a1e29903e7bd0f",
+		"da0c0089713cfd5b47f425f23c23f9a9d82e62000873747dce1a73220319f93e",
+		"94596876e5408289110c03aee0bf01dda5d9632d4614041e644bf4809fc46b5f",}
 	if strings.HasPrefix(string(os.Args[1]), "https://") {
 		test_ssl(os.Args[1])
 	} else if strings.EqualFold(string(os.Args[1]), "options") {
@@ -21,10 +26,17 @@ func main() {
 		fmt.Println("X-Content-Type-Options: Stops Browser from Sniffing the content type")
 		fmt.Println("Referer-Policy: Allow the site to control the value of the referer header in links away " +
 			"from their pages")
+	} else if strings.EqualFold(string(os.Args[1]), "show_hashes") {
+		show_exhash(arr_hashes)
+	} else if strings.EqualFold(string(os.Args[1]), "check_av") {
+		check_av(arr_hashes, os.Args[2])
 	} else {
-		fmt.Println("Usage: go run ssl_analysis.go https://www.google.de")
+		fmt.Println("Usage: go run ssl_analysis.go https://<domain.tld>")
 		fmt.Println("If you want to get information about the security options in the header use: \n " +
 			"go run ssl_analysis.go options")
+		fmt.Println("Test SonicWall AV in DPI-SSL with the example hashes \n " +
+			"go run ssl_analysis check_av <address:port>")
+		fmt.Println("Show all example Hashes: go run ssl_analysis show_hashes")
 	}
 }
 
@@ -120,6 +132,27 @@ func print_headers(temp_header http.Header) {
 		fmt.Println("You have no Security Options activated! You should do this immediately!")
 	}
 	fmt.Println("\n\nServer Version is:",srv_vers)
+}
+// "81.169.250.137:443"
 
+func check_av(hashes []string, adr string) {
+	conf := &tls.Config{
+		// Uncomment this if your certificate has some problems
+		//InsecureSkipVerify: true,
+	}
+	conn, err := tls.Dial("tcp", adr, conf)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer conn.Close()
+	for _, value := range hashes {
+		conn.Write([]byte(value))
+	}
+}
 
+func show_exhash(arr_h []string) {
+	fmt.Println("Those are example SHA256 Hashes from REAL malware")
+	for _, value := range arr_h {
+		fmt.Println(value)
+	}
 }
