@@ -16,6 +16,10 @@ Created by: chrisbsd
     * go run ssl_analysis.go options
 * Start it using your website: 
     * go run ssl_analysis.go https://www.yourwebsite.com
+* List the four sample hashes
+    * go run ssl_analysis.go show_hashes
+* Checks the AV functionality in SonicOS. Use it after DPI SSL analysis is enabled. Implement an endpoint with mlwr_srv.go.
+    * go run ssl_analysis.go check_av <address_of_mlwr_srv or other HTTPS Endpoint>
 
 
 If you have any questions regarding this tool contact me: chsieger@secomos.de

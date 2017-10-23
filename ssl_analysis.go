@@ -1,5 +1,9 @@
 package main
 
+// A simple Golang program to help administrators with TLS/SSL related aspects.
+// Especially useful for use with DPI SSL analysis from SonicWall.
+// Author: chrisbsd
+
 import (
 	"net/http"
 	"fmt"
@@ -11,6 +15,8 @@ import (
 )
 
 func main() {
+	
+	// If you add a hash dont forget to add the description in the check_av function
 	arr_hashes := []string {
 		"df255af635a2dde04c031db95862f11e1bf44fe5cfc10d3b20bd4678ed818567",
 		"33b62b95281bb0ecbad2523bb99e4853fd516044b8f2b42ef4a1e29903e7bd0f",
@@ -147,8 +153,14 @@ func check_av(hashes []string, adr string) {
 
 func show_exhash(arr_h []string) {
 	fmt.Println("Those are example SHA256 Hashes from REAL malware")
-	for _, value := range arr_h {
-		fmt.Println(value)
+	add_hashes := []string {
+		"OS:Win32 Type:exe Description: Locky variant 10/2017",
+		"OS:Win32 Type:exe Description: File Replication Malware",
+		"OS:Win32 Type:exe Description: Generic Trojan Malware",
+		"OS:Win32 Type:exe Description: Trojan Dropper",
+	}
+	for i, value := range arr_h {
+		fmt.Println(add_hashes[i], "\n", value)
 	}
 }
 func usage(){
