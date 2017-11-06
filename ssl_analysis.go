@@ -28,13 +28,27 @@ func main() {
 		test_ssl(os.Args[1])
 	} else {
 		switch os.Args[1] {
-		case "options" : fmt.Println("HSTS: Enforce the use of TLS/SSL in an user agent\n" +
-			"Content Security Policy: Helpful to protect your site against XSS attacks\n" +
-			"X-Frame-Options: Preventing a browser from framing your site. Helpful against clickjacking\n" +
-			"X-XSS-Protection: Configure XSS Protection in Chrome, Safari and IE\n" +
-			"X-Content-Type-Options: Stops Browser from Sniffing the content type\n" +
-			"Referer-Policy: Allow the site to control the value of the referer header in links away " +
-			"from their pages")
+		case "options" : fmt.Println("Source: developer.mozilla.org\n\n" +
+			"HSTS: \nEnforce the use of TLS/SSL in an user agent\n\n" +
+			"Content Security Policy: \nThe HTTP Content-Security-Policy response header allows web site " +
+				"administrators to control resources the user agent is allowed to load for a given page. " +
+				"With a few exceptions, policies mostly involve specifying server origins and script endpoints. " +
+				"This helps guard against cross-site scripting attacks (XSS).\n\n" +
+			"X-Frame-Options: \nThe X-Frame-Options HTTP response header can be used to indicate whether or not a " +
+				"browser should be allowed to render a page in a <frame>, <iframe> or <object> . Sites can use this " +
+				"to avoid clickjacking attacks, by ensuring that their content is not embedded into other sites.\n\n" +
+			"X-XSS-Protection: \nThe HTTP X-XSS-Protection response header is a feature of Internet Explorer, Chrome " +
+				"and Safari that stops pages from loading when they detect reflected cross-site scripting (XSS) " +
+				"attacks. Although these protections are largely unnecessary in modern browsers when sites " +
+				"implement a strong Content-Security-Policy that disables the use of inline JavaScript " +
+				"('unsafe-inline'), they can still provide protections for users of older web browsers that don't " +
+				"yet support CSP.\n\n" +
+			"X-Content-Type-Options: \nThe X-Content-Type-Options response HTTP header is a marker used by the server " +
+				"to indicate that the MIME types advertised in the Content-Type headers should not be changed and be " +
+				"followed. This allows to opt-out of MIME type sniffing, or, in other words, it is a way to say that " +
+				"the webmasters knew what they were doing.\n\n" +
+			"Referer-Policy: \nThe Referrer-Policy HTTP header governs which referrer information, sent in the Referer " +
+				"header, should be included with requests made.")
 		case "show_hashes": show_exhash(arr_hashes)
 		case "check_av": check_av(arr_hashes, os.Args[2])
 		default: usage()
