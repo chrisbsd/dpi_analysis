@@ -17,7 +17,7 @@ import (
 func main() {
 	
 	// If you add a hash dont forget to add the description in the check_av function
-	arr_hashes := []string {
+	arrHashes := []string {
 		"df255af635a2dde04c031db95862f11e1bf44fe5cfc10d3b20bd4678ed818567",
 		"33b62b95281bb0ecbad2523bb99e4853fd516044b8f2b42ef4a1e29903e7bd0f",
 		"da0c0089713cfd5b47f425f23c23f9a9d82e62000873747dce1a73220319f93e",
@@ -25,7 +25,7 @@ func main() {
 	if len(os.Args) != 2 {
 		usage()
 	} else if strings.HasPrefix(string(os.Args[1]), "https://") {
-		test_ssl(os.Args[1])
+		executeTest(os.Args[1])
 	} else {
 		switch os.Args[1] {
 		case "options" : fmt.Println("Source: developer.mozilla.org\n\n" +
@@ -49,14 +49,14 @@ func main() {
 				"the webmasters knew what they were doing.\n\n" +
 			"Referer-Policy: \nThe Referrer-Policy HTTP header governs which referrer information, sent in the Referer " +
 				"header, should be included with requests made.")
-		case "show_hashes": show_exhash(arr_hashes)
-		case "check_av": check_av(arr_hashes, os.Args[2])
+		case "show_hashes": showExHash(arrHashes)
+		case "check_av": checkAV(arrHashes, os.Args[2])
 		default: usage()
 		}
 	}
 }
 
-func test_ssl(domain string){
+func executeTest(domain string){
 	data, err := http.Get(domain)
 	if err != nil {
 		fmt.Println("There seems to be a problem with the certificate of", domain)
@@ -71,38 +71,38 @@ func test_ssl(domain string){
 			fmt.Println(err)
 		}else{
 			fmt.Println("Skip Security Verification..")
-			temp_header := data2.Header
-			print_headers(temp_header)
-			var_temp := domain[8:] + ":443"
+			tempHeader := data2.Header
+			printHeaders(tempHeader)
+			varTemp := domain[8:] + ":443"
 			conf := &tls.Config{
 				InsecureSkipVerify: true,
 			}
-			conn, err := tls.Dial("tcp", var_temp, conf)
+			conn, err := tls.Dial("tcp", varTemp, conf)
 			if err != nil {
 				fmt.Println(err)
 			}
 			cert := conn.ConnectionState().PeerCertificates[0]
 
 			defer conn.Close()
-			print_values(cert)
+			printValues(cert)
 		}
 	} else {
 		fmt.Println("Certificate seems okay... Lets check the HTTPS Response Header... \n ")
-		temp_header := data.Header
-		print_headers(temp_header)
+		tempHeader := data.Header
+		printHeaders(tempHeader)
 		fmt.Println(" \nChecking the certificate...")
-		var_temp := domain[8:] + ":443"
-		conn, err := tls.Dial("tcp", var_temp, nil)
+		varTemp := domain[8:] + ":443"
+		conn, err := tls.Dial("tcp", varTemp, nil)
 		if err != nil {
 			fmt.Println(err)
 		}
 		cert := conn.ConnectionState().PeerCertificates[0]
 		defer conn.Close()
-		print_values(cert)
+		printValues(cert)
 	}
 }
 
-func print_values(cert *x509.Certificate) {
+func printValues(cert *x509.Certificate) {
 	fmt.Println("\nThe Certificate was Issued by:\n", cert.Issuer,
 		"\nHere are some additional Information about the Certificate:\n\nSubject:", cert.Subject,
 		"\nStarts:", cert.NotBefore,
@@ -112,18 +112,18 @@ func print_values(cert *x509.Certificate) {
 		"\nIssues URL:  ", cert.IssuingCertificateURL)
 }
 
-func print_headers(temp_header http.Header) {
-	arr_regex := [7]string{ "X-Xss-Protection", "X-Frame-Options", "Strict-Transport-Security",
+func printHeaders(tempHeader http.Header) {
+	arrRegex := [7]string{ "X-Xss-Protection", "X-Frame-Options", "Strict-Transport-Security",
 		"Content-Security-Policy", "X-Content-Type-Options", "Public-Key-Pins", "Referrer-Policy" }
-	fmt.Println("Your HTTPS Response was checked for these Security Options: ", arr_regex)
+	fmt.Println("Your HTTPS Response was checked for these Security Options: ", arrRegex)
 	x := 0
 	y := 0
-	srv_vers := "nil"
-	for _, value := range arr_regex {
-		for key, val := range temp_header {
+	srvVersion := "nil"
+	for _, value := range arrRegex {
+		for key, val := range tempHeader {
 			if key == "Server" {
 				justString := strings.Join(val," ")
-				srv_vers = justString
+				srvVersion = justString
 			}
 			r, err := regexp.Compile(value)
 			if err != nil {
@@ -146,11 +146,11 @@ func print_headers(temp_header http.Header) {
 	if x == 0 {
 		fmt.Println("You have no Security Options activated! You should do this immediately!")
 	}
-	fmt.Println("\n\nServer Version is:",srv_vers)
+	fmt.Println("\n\nServer Version is:", srvVersion)
 }
 // "81.169.250.137:443"
 
-func check_av(hashes []string, adr string) {
+func checkAV(hashes []string, adr string) {
 	conf := &tls.Config{
 		// Uncomment this if your certificate has some problems
 		//InsecureSkipVerify: true,
@@ -165,16 +165,16 @@ func check_av(hashes []string, adr string) {
 	}
 }
 
-func show_exhash(arr_h []string) {
+func showExHash(arrHash []string) {
 	fmt.Println("Those are example SHA256 Hashes from REAL malware")
-	add_hashes := []string {
+	addHashes := []string {
 		"OS:Win32 Type:exe Description: Locky variant 10/2017",
 		"OS:Win32 Type:exe Description: File Replication Malware",
 		"OS:Win32 Type:exe Description: Generic Trojan Malware",
 		"OS:Win32 Type:exe Description: Trojan Dropper",
 	}
-	for i, value := range arr_h {
-		fmt.Println(add_hashes[i], "\n", value)
+	for i, value := range arrHash {
+		fmt.Println(addHashes[i], "\n", value)
 	}
 }
 func usage(){
