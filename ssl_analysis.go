@@ -5,60 +5,66 @@ package main
 // Author: chrisbsd
 
 import (
-	"net/http"
-	"fmt"
 	"crypto/tls"
-	"os"
 	"crypto/x509"
+	"fmt"
+	"net/http"
+	"os"
 	"regexp"
 	"strings"
 )
 
 func main() {
-	
+
 	// If you add a hash dont forget to add the description in the check_av function
-	arrHashes := []string {
+	arrHashes := []string{
 		"df255af635a2dde04c031db95862f11e1bf44fe5cfc10d3b20bd4678ed818567",
 		"33b62b95281bb0ecbad2523bb99e4853fd516044b8f2b42ef4a1e29903e7bd0f",
 		"da0c0089713cfd5b47f425f23c23f9a9d82e62000873747dce1a73220319f93e",
-		"94596876e5408289110c03aee0bf01dda5d9632d4614041e644bf4809fc46b5f",}
+		"94596876e5408289110c03aee0bf01dda5d9632d4614041e644bf4809fc46b5f"}
 	if len(os.Args) != 2 {
 		usage()
 	} else if strings.HasPrefix(string(os.Args[1]), "https://") {
 		executeTest(os.Args[1])
 	} else {
 		switch os.Args[1] {
-		case "options" : fmt.Println("Source: developer.mozilla.org\n\n" +
-			"HSTS: \nEnforce the use of TLS/SSL in an user agent\n\n" +
-			"Content Security Policy: \nThe HTTP Content-Security-Policy response header allows web site " +
+		case "options":
+			fmt.Println("Source: developer.mozilla.org\n\n" +
+				"HSTS: \nEnforce the use of TLS/SSL in an user agent\n\n" +
+				"Content Security Policy: \nThe HTTP Content-Security-Policy response header allows web site " +
 				"administrators to control resources the user agent is allowed to load for a given page. " +
 				"With a few exceptions, policies mostly involve specifying server origins and script endpoints. " +
 				"This helps guard against cross-site scripting attacks (XSS).\n\n" +
-			"X-Frame-Options: \nThe X-Frame-Options HTTP response header can be used to indicate whether or not a " +
+				"X-Frame-Options: \nThe X-Frame-Options HTTP response header can be used to indicate whether or not a " +
 				"browser should be allowed to render a page in a <frame>, <iframe> or <object> . Sites can use this " +
 				"to avoid clickjacking attacks, by ensuring that their content is not embedded into other sites.\n\n" +
-			"X-XSS-Protection: \nThe HTTP X-XSS-Protection response header is a feature of Internet Explorer, Chrome " +
+				"X-XSS-Protection: \nThe HTTP X-XSS-Protection response header is a feature of Internet Explorer, Chrome " +
 				"and Safari that stops pages from loading when they detect reflected cross-site scripting (XSS) " +
 				"attacks. Although these protections are largely unnecessary in modern browsers when sites " +
 				"implement a strong Content-Security-Policy that disables the use of inline JavaScript " +
 				"('unsafe-inline'), they can still provide protections for users of older web browsers that don't " +
 				"yet support CSP.\n\n" +
-			"X-Content-Type-Options: \nThe X-Content-Type-Options response HTTP header is a marker used by the server " +
+				"X-Content-Type-Options: \nThe X-Content-Type-Options response HTTP header is a marker used by the server " +
 				"to indicate that the MIME types advertised in the Content-Type headers should not be changed and be " +
 				"followed. This allows to opt-out of MIME type sniffing, or, in other words, it is a way to say that " +
 				"the webmasters knew what they were doing.\n\n" +
-			"Referer-Policy: \nThe Referrer-Policy HTTP header governs which referrer information, sent in the Referer " +
+				"Referer-Policy: \nThe Referrer-Policy HTTP header governs which referrer information, sent in the Referer " +
 				"header, should be included with requests made.")
-		case "show_hashes": showExHash(arrHashes)
-		case "check_av": checkAV(arrHashes, os.Args[2])
-		default: usage()
+		case "show_hashes":
+			showExHash(arrHashes)
+		case "check_av":
+			checkAV(arrHashes, os.Args[2])
+		default:
+			usage()
 		}
 	}
 }
 
-func executeTest(domain string){
+func executeTest(domain string) {
 	data, err := http.Get(domain)
+	skipTrue := 0
 	if err != nil {
+		skipTrue = 1
 		fmt.Println("There seems to be a problem with the certificate of", domain)
 		fmt.Println(err)
 		fmt.Println("Trying with skipped Security Verification...")
@@ -66,33 +72,27 @@ func executeTest(domain string){
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 		client := &http.Client{Transport: tr}
-		data2, err := client.Get(domain)
+		data, err = client.Get(domain)
 		if err != nil {
 			fmt.Println(err)
-		}else{
-			fmt.Println("Skip Security Verification..")
-			tempHeader := data2.Header
-			printHeaders(tempHeader)
-			varTemp := domain[8:] + ":443"
-			conf := &tls.Config{
-				InsecureSkipVerify: true,
-			}
-			conn, err := tls.Dial("tcp", varTemp, conf)
-			if err != nil {
-				fmt.Println(err)
-			}
-			cert := conn.ConnectionState().PeerCertificates[0]
-
-			defer conn.Close()
-			printValues(cert)
 		}
+
+	}
+	printHeaders(data.Header)
+	fmt.Println(" \nChecking the certificate...")
+	if skipTrue == 0 {
+		conn, err := tls.Dial("tcp", domain[8:]+":443", nil)
+		if err != nil {
+			fmt.Println(err)
+		}
+		cert := conn.ConnectionState().PeerCertificates[0]
+		defer conn.Close()
+		printValues(cert)
 	} else {
-		fmt.Println("Certificate seems okay... Lets check the HTTPS Response Header... \n ")
-		tempHeader := data.Header
-		printHeaders(tempHeader)
-		fmt.Println(" \nChecking the certificate...")
-		varTemp := domain[8:] + ":443"
-		conn, err := tls.Dial("tcp", varTemp, nil)
+		conf := &tls.Config{
+			InsecureSkipVerify: true,
+		}
+		conn, err := tls.Dial("tcp", domain[8:]+":443", conf)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -100,6 +100,7 @@ func executeTest(domain string){
 		defer conn.Close()
 		printValues(cert)
 	}
+
 }
 
 func printValues(cert *x509.Certificate) {
@@ -113,8 +114,8 @@ func printValues(cert *x509.Certificate) {
 }
 
 func printHeaders(tempHeader http.Header) {
-	arrRegex := [7]string{ "X-Xss-Protection", "X-Frame-Options", "Strict-Transport-Security",
-		"Content-Security-Policy", "X-Content-Type-Options", "Public-Key-Pins", "Referrer-Policy" }
+	arrRegex := [7]string{"X-Xss-Protection", "X-Frame-Options", "Strict-Transport-Security",
+		"Content-Security-Policy", "X-Content-Type-Options", "Public-Key-Pins", "Referrer-Policy"}
 	fmt.Println("Your HTTPS Response was checked for these Security Options: ", arrRegex)
 	x := 0
 	y := 0
@@ -122,7 +123,7 @@ func printHeaders(tempHeader http.Header) {
 	for _, value := range arrRegex {
 		for key, val := range tempHeader {
 			if key == "Server" {
-				justString := strings.Join(val," ")
+				justString := strings.Join(val, " ")
 				srvVersion = justString
 			}
 			r, err := regexp.Compile(value)
@@ -136,11 +137,11 @@ func printHeaders(tempHeader http.Header) {
 				y = 1
 			}
 		}
-	if y==0 {
-		fmt.Println("NOT implemented ", value)
-	}else {
-		y = 0
-	}
+		if y == 0 {
+			fmt.Println("NOT implemented ", value)
+		} else {
+			y = 0
+		}
 	}
 	fmt.Println(x, " activated Security Options were found in your response!")
 	if x == 0 {
@@ -148,6 +149,7 @@ func printHeaders(tempHeader http.Header) {
 	}
 	fmt.Println("\n\nServer Version is:", srvVersion)
 }
+
 // "81.169.250.137:443"
 
 func checkAV(hashes []string, adr string) {
@@ -167,7 +169,7 @@ func checkAV(hashes []string, adr string) {
 
 func showExHash(arrHash []string) {
 	fmt.Println("Those are example SHA256 Hashes from REAL malware")
-	addHashes := []string {
+	addHashes := []string{
 		"OS:Win32 Type:exe Description: Locky variant 10/2017",
 		"OS:Win32 Type:exe Description: File Replication Malware",
 		"OS:Win32 Type:exe Description: Generic Trojan Malware",
@@ -177,7 +179,7 @@ func showExHash(arrHash []string) {
 		fmt.Println(addHashes[i], "\n", value)
 	}
 }
-func usage(){
+func usage() {
 	fmt.Println("Usage: go run ssl_analysis.go https://<domain.tld>\n" +
 		"If you want to get information about the security options in the header use: \n" +
 		"   go run ssl_analysis.go options\nTest SonicWall AV with DPI-SSL with the example hashes: \n" +

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"net/smtp"
-	"net"
 	"bufio"
-	"os"
 	"crypto/tls"
+	"fmt"
+	"net"
+	"net/smtp"
+	"os"
 )
 
 func start_server(pw string, to string, from string, host string, port string, cert string, key string) {
@@ -40,7 +40,7 @@ func main() {
 	start_server(os.Args[1], os.Args[2], os.Args[3], os.Args[4], os.Args[5], os.Args[6], os.Args[7])
 }
 
-func send_mail(pw string, hash string, to string, from string, host string, port string){
+func send_mail(pw string, hash string, to string, from string, host string, port string) {
 	auth := smtp.PlainAuth(
 		"",
 		from,
