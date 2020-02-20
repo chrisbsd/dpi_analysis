@@ -22,4 +22,4 @@ Created by: chrisbsd
     * **go run ssl_analysis.go check_av <address_of_mlwr_srv or other HTTPS Endpoint>**
 
 
-If you have any questions regarding this tool contact me: chsieger@secomos.de
+If you have any questions regarding this tool contact me: christian[dot]siegert[at]vulidity[dot]de
